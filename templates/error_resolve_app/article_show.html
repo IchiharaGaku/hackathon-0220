@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% block content %}
+    <video id="video_content" width="960" height="720" src="/media/{{ article.id }}/{{ article.movie_name}}" poster="/media/{{ article.id }}/thumb.jpg" controls></video>
+{% endblock %}
