@@ -21,11 +21,14 @@
             <div>
               <button class="doSearch" @click="tosearch" >検索する</button>
             </div>
-            <div class="account">
+            <div class="account" @click="showMenu">
                 アカウント
                 <span class="triangle-account"></span>
             </div>
                 </nav>
+                <div class="modal" v-if="menu">
+                  <button class="logout" @click="logout">ログアウト</button>
+              </div>
           </div>
         </header>
           <div class="main">
@@ -59,6 +62,7 @@
             el: '#app',
             data: {
                keyword:"",
+               menu:false,
                article: null,
                content_html: "",
                //title: 'タイトルタイトルタイトル',
@@ -94,6 +98,14 @@
                     tosearch() {
                     console.log("oooo");
                     location.href = `/article_result/?keyword=${this.search}`;
+                },
+                logout() {
+                    location.href = `/accounts/logout/`;
+                },
+                showMenu() {
+                console.log("ok");
+                    this.menu = !this.menu;
+                    console.log(this.menu);
                 }
 
             },
@@ -405,6 +417,27 @@
                     border: 1px solid #222;
                     font-weight: 500;
             }
+            .modal {
+                width: 150px;
+                height: 30px;
+                background-color: rgb(106, 206, 236);
+                box-shadow: 0 0 8px gray;
+                position: absolute;
+                top: 50px;
+                right: 20px;
+                border-radius: 7px;
+                display: flex;
+                left:90%;
+            }
+  .logout {
+    justify-content: center;
+    margin: 0 auto;
+    text-align: center;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
 
       </style>
 {% endblock %}

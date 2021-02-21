@@ -4,22 +4,25 @@
       <header>
         <div class="header">
             <h1 class="title">Eresolve</h1>
-						<nav class="nav">
-            	<div class="post">
-            	    <span></span>
-            	    <button class="post-article" @click="toUpload()">投稿する<span class="triangle-post"></span></button>
-            	</div>
-            	<div>
-            	    <input type="text" class="search" v-model="search" value="キーワードを入力">
-            	</div>
+            <nav class="nav">
+                <div class="post">
+                    <span></span>
+                    <button class="post-article" @click="toUpload()">投稿する<span class="triangle-post"></span></button>
+                </div>
+                <div>
+                    <input type="text" class="search" v-model="search" value="キーワードを入力">
+                </div>
                 <div>
                     <button class="doSearch" @click="tosearch" >検索する</button>
-                  </div>
-            	<div class="account">
-            	    アカウント
-            	    <span class="triangle-account"></span>
-            	</div>
-					  </nav>
+                </div>
+                <div class="account" @click="showMenu">
+                    アカウント
+                    <span class="triangle-account"></span>
+                </div>
+            </nav>
+            <div class="modal" v-if="menu">
+                <button class="logout" @click="logout">ログアウト</button>
+            </div>
         </div>
       </header>
 			<div class="main">
@@ -44,7 +47,7 @@
 					</div>
 					<div class="article" v-for="(article, index) in user.articles" :key="index" @click="showDetail(article.id)">
 						<div class="article__title">[[ article.title ]]</div>
-						<div class="date">[[ article.created_at|time_format ]]</div>
+						<div class="date">[[article.upload_user__username]] [[ article.created_at|time_format ]]</div>
 						<p class="devide"></p>
 					</div>
 					<!-- <div class="article">
@@ -69,6 +72,7 @@
             el: '#app',
             data: {
                 search: '',
+                menu: false,
                 user: {
                     name: '',
                     detail: 'テキストテキストテキストテキストテキストテキステキストテキストテキストテキストテキストテキストテキストテキスト',
@@ -128,6 +132,12 @@
                 tosearch() {
                     console.log("oooo");
                     location.href = `/article_result/?keyword=${this.search}`;
+                },
+                logout() {
+                    location.href = `/accounts/logout/`;
+                },
+                showMenu() {
+                    this.menu = !this.menu;
                 }
             },
             filters: {//日本時間に直す
@@ -441,8 +451,26 @@
                     border: 1px solid #222;
                     font-weight: 500;
             }
-
-
+            .modal {
+                width: 150px;
+                height: 30px;
+                background-color: rgb(106, 206, 236);
+                box-shadow: 0 0 8px gray;
+                position: absolute;
+                top: 50px;
+                right: 20px;
+                border-radius: 7px;
+                display: flex;
+                left:90%;
+            }
+  .logout {
+    justify-content: center;
+    margin: 0 auto;
+    text-align: center;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+  }
 
 
 
