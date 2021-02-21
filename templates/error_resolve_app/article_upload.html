@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div id="app">
+        <form v-on:submit.prevent="uploadArticle">
+            <label for="title">title:</label>
+            <input type="text" id="keyword" v-model="title">
+            <label for="content">content:</label>
+            <textarea v-model="content"></textarea>
+            <label for="movie">movie:</label>
+            <input type="file" id="movie" @change="onMovieUploaded">
+            <button type="submit" >Upload</button>
+        </form>
+    </div>
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <script>
+        var vm = new Vue({
+            delimiters: ['[[', ']]'],
+            el: '#app',
+            data: {
+               title:"",
+               content:"",
+               movie: null,
+            },
+            methods: {
+                //ファイルのアップロードボタンが押された時
+                onMovieUploaded(e) {
+                    
+                    this.movie = e.target.files[0];
+                    
+                },
+                uploadArticle:function() {
+                   
+                    if (this.title && this.content && this.move !== null) {
+                       
+                        csrftoken = Cookies.get('csrftoken');
+                        headers = {'X-CSRFToken': csrftoken};
+
+                        const data = new FormData();//送信するデータ
+                        data.append('title', this.title);
+                        data.append('content', this.content);
+                        data.append('file', this.movie);
+                        
+                        axios.post("{% url 'error_resolve_app:article_save' %}", data, {headers: headers})//フォームのデータを送信
+                            .then(function () {
+                                location.href="{% url 'error_resolve_app:home' %}";//articleの登録が上手くいけばhome画面へリダイレクト
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+
+
+                    }
+
+                },
+            },
+        })
+
+
+    </script>
+{% endblock %}

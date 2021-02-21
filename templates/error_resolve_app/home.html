@@ -1,5 +1,42 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div id="home"></div>
+    <div id="app">
+        <ul v-cloak v-for="article in articles">
+        <li>
+            <span>
+            [[ article.title ]]
+            </span>
+        </li>
+        </ul>
+    </div>
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        var vm = new Vue({
+            delimiters: ['[[', ']]'],
+            el: '#app',
+            data: {
+                articles: [],//自分の記事たち
+            },
+            mounted: function() {
+                axios.get('{% url "error_resolve_app:my_article" %}')//ここでDjangoにアクセス
+                .then(function (response) {
+                    for(var d in response.data) {
+                    var article = response.data[d];//1つ1つの自分の記事
+                    console.log(article);
+                    //item.due = new Date(item.due);
+                    vm.articles.push(article);
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
+                .then(function () {
+                });
+            },
+        })
+
+
+    </script>
 {% endblock %}

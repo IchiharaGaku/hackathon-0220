@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div id="app">
+        <ul v-cloak v-for="article in articles">
+            <li>
+                <span>
+                [[ article.title ]]
+                </span>
+            </li>
+            </ul>
+        <form v-on:submit.prevent="searchArticle">
+            <label for="keyword">Keyword:</label>
+            <input type="text" id="keyword" v-model="keyword">
+            <button type="submit" >Search</button>
+        </form>
+    </div>
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        var vm = new Vue({
+            delimiters: ['[[', ']]'],
+            el: '#app',
+            data: {
+               keyword:"",
+               articles: [],//検索した結果達
+            },
+            methods: {
+                searchArticle:function() {
+                    if (this.keyword) {
+                        
+                        axios.get(`/result_articles/?keyword=${this.keyword}`)//ここでDjangoにアクセス
+                        .then(function (response) {
+                            for(var d in response.data) {
+                            var article = response.data[d];//検索した結果の1つ1つの記事
+                            //item.due = new Date(item.due);
+                            vm.articles.push(article);
+                            }
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        })
+                        .then(function () {
+                        });
+                    }
+                },
+            },
+        })
+
+
+    </script>
+{% endblock %}

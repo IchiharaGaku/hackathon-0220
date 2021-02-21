@@ -1,4 +1,37 @@
 {% extends "base.html" %}
 {% block content %}
-    <video id="video_content" width="960" height="720" src="/media/{{ article.id }}/{{ article.movie_name}}" poster="/media/{{ article.id }}/thumb.jpg" controls></video>
+    <div id="app">
+        <video id="video_content" width="960" height="720" :src="'/media/' + article.id + '/' + article.movie_name" :poster="'/media/' + article.id + '/thumb.jpg'" controls></video>
+    </div>
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        var vm = new Vue({
+            delimiters: ['[[', ']]'],
+            el: '#app',
+            data: {
+               keyword:"",
+               article: null,
+            },
+            methods: {
+                window:onload = function() {
+
+                    axios.get("{% url 'error_resolve_app:detail_article'%}")//ここでDjangoに送信
+                    .then(function (response) { 
+                          vm.article = response.data;//response.dataに詳細を表示させたいarticleが入っている
+                        
+                        })
+                        
+                        .catch(function (error) {
+                            console.log(error);
+                        })
+                        .then(function () {
+                        });
+
+
+                    }
+
+            },
+        });
+    </script>
 {% endblock %}
