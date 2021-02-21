@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
 from django.views import View
-from .forms import ArticleUploadForm
 from .models import Article
 from django.core.files.storage import default_storage, FileSystemStorage
 from django.conf import settings
@@ -16,8 +15,15 @@ DATA_DIR = settings.MEDIA_ROOT
 # 自分が書いた記事をとってくる
 class GetMyArticle(View):
     def get(self, request, *args, **kwargs):
-
-        my_articles = Article.objects.all().values()
+        my_articles = Article.objects.filter(upload_user__id=request.user.id).values(
+            "id",
+            "movie_name",
+            "content",
+            "created_at",
+            "title",
+            "upload_user__username",
+            "upload_user__id",
+        )
         return JsonResponse(list(my_articles), safe=False)
 
 
@@ -26,27 +32,21 @@ class GetResultArticles(View):
     def get(self, request, *args, **kwargs):
 
         keyword = request.GET["keyword"]
-        result_articles = Article.objects.filter(title__icontains=keyword).values()
+        result_articles = Article.objects.filter(title__icontains=keyword).values(
+            "id",
+            "movie_name",
+            "content",
+            "created_at",
+            "title",
+            "upload_user__username",
+            "upload_user__id",
+        )
         return JsonResponse(list(result_articles), safe=False)
 
 
 # 記事の投稿
 class ArticleSave(View):
-    
-
     def post(self, request, *args, **kwargs):
-
-        """
-        form = ArticleUploadForm(request.POST, request.FILES)
-
-        if not form.is_valid():
-
-            return render(
-                request, "error_resolve_app/home.html", {"form": ArticleUploadForm()}
-            )
-        
-        new_movie_name = form.cleaned_data["movie"].name
-        """
 
         upload_file_name = request.FILES["file"].name  # ファイル名
         movie = request.FILES["file"]  # ファイルの中身
@@ -58,6 +58,7 @@ class ArticleSave(View):
         new_article.content = content
         new_article.title = title
         new_article.created_at = timezone.now()
+        new_article.upload_user = request.user
         new_article.save()
 
         try:
@@ -125,14 +126,14 @@ class ArticleSave(View):
         storage.delete(str(content_id) + "/" + "thumb.jpg")
         storage.delete(str(content_id) + "/")
 
+
 # 記事詳細画面を表示させるためのクラス
 class ArticleShowView(View):
-
     def get(self, request, article_id, *args, **kwargs):
 
-        request.session['article_id'] = article_id
+        request.session["article_id"] = article_id
 
-        return render(request, 'error_resolve_app/article_show.html')
+        return render(request, "error_resolve_app/article_show.html")
 
 
 # 記事詳細のデータをとってくる
@@ -140,15 +141,14 @@ class GetDetailArticle(View):
     def get(self, request, *args, **kwargs):
 
         article_id = request.session["article_id"]
-        article = Article.objects.values().get(
-            pk=article_id
-        )  # articleの内容が{id:1, content:'~'}の形で入っている
+        article = Article.objects.values(
+            "id",
+            "movie_name",
+            "content",
+            "created_at",
+            "title",
+            "upload_user__username",
+            "upload_user__id",
+        ).get(pk=article_id)
 
         return JsonResponse(article, safe=False)
-
-    """
-        return render(
-            request, "error_resolve_app/article_show.html", {"article": article}
-        )
-      
-"""

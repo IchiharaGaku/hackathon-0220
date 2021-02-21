@@ -37,8 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts.apps.AccountsConfig',
      # aplication
+    'accounts.apps.AccountsConfig',
     'error_resolve_app.apps.ErrorResolveAppConfig',
 ]
 
@@ -126,6 +126,6 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-LOGIN_URL = 'login' # ログインしていないときのリダイレクト先
-LOGIN_REDIRECT_URL = 'index' # ログイン後のリダイレクト先
-LOGOUT_REDIRECT_URL = 'index' # ログアウト後のリダイレクト先
+LOGIN_URL = 'accounts:login' # ログインしていないときのリダイレクト先
+LOGIN_REDIRECT_URL = 'error_resolve_app:home' # ログイン後のリダイレクト先
+LOGOUT_REDIRECT_URL = 'accounts:login' # ログアウト後のリダイレクト先

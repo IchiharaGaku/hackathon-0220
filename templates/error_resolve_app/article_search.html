@@ -5,7 +5,7 @@
         <ul v-cloak v-for="article in articles">
             <li>
                 <span>
-                [[ article.title ]]
+                [[ article.created_at|time_format ]]
                 </span>
             </li>
             </ul>
@@ -17,6 +17,8 @@
     </div>
     <script src="https://unpkg.com/vue"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.23.0/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.23.0/locale/ja.js"></script>
     <script>
         var vm = new Vue({
             delimiters: ['[[', ']]'],
@@ -44,6 +46,11 @@
                         });
                     }
                 },
+            },
+            filters: {//日本時間に直す
+                time_format: function (date) {
+                    return moment(date).format('YYYY/MM/DD HH:mm');// eslint-disable-line
+                }
             },
         })
 
