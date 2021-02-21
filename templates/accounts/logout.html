@@ -1,14 +1,21 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>LOGOUT</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
-<form action="" method="POST">
-{% csrf_token %}
-<button type="submit">ログアウト</button>
-</form>
-</body>
-</html>
+{% extends 'base.html' %}
+{% load static %}
+{% block customcss %}
+<link href="{% static 'css/accounts.css' %}" rel="stylesheet">
+{% endblock customcss %}
+
+
+{% block header %}
+
+{% endblock header %}
+{% block content %}
+<div class = create-accounts>
+    <form action="" method="POST">
+    {% csrf_token %}
+        <div class = "button_wrapper">
+            <button type="submit">ログアウト</button>
+        </div>
+    </form>   
+</div>
+{% endblock content %}

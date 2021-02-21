@@ -1,15 +1,23 @@
 <!DOCTYPE html>
+{% extends 'base.html' %}
+{% load static %}
+{% block customcss %}
+<link href="{% static 'css/accounts.css' %}" rel="stylesheet">
+{% endblock customcss %}
 <html>
-<head>
-    <meta charset="utf-8" />
-    <title>LOGIN</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
-    <form action="" method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">ログイン</button>
-    </form>
-</body>
+{% block header %}
+
+{% endblock header %}
+{% block content %}
+<div class = create-accounts>
+    <p>新規ユーザーの作成</p>
+        <form action="" method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class = "button_wrapper">
+                <button type="submit">ログイン</button>
+            </div>
+        </form>
+</div>
+{% endblock content %}
 </html>
