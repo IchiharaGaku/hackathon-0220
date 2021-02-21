@@ -1,65 +1,88 @@
 from django.shortcuts import render, redirect
 from django.views import View
-from .forms import ArticleUploadForm
 from .models import Article
 from django.core.files.storage import default_storage, FileSystemStorage
 from django.conf import settings
 import ffmpeg
+import json
+from django.utils import timezone
+from django.http import JsonResponse
+
 
 # Create your views here.
 DATA_DIR = settings.MEDIA_ROOT
 
+# 自分が書いた記事をとってくる
+class GetMyArticle(View):
+    def get(self, request, *args, **kwargs):
+        my_articles = Article.objects.filter(upload_user__id=request.user.id).values(
+            "id",
+            "movie_name",
+            "content",
+            "created_at",
+            "title",
+            "upload_user__username",
+            "upload_user__id",
+        )
+        return JsonResponse(list(my_articles), safe=False)
 
-class HomeView(View):
+
+# keywordがtitleに含まれている記事をとってくる
+class GetResultArticles(View):
     def get(self, request, *args, **kwargs):
 
-        return render(request, "error_resolve_app/home.html")
+        keyword = request.GET["keyword"]
+        result_articles = Article.objects.filter(title__icontains=keyword).values(
+            "id",
+            "movie_name",
+            "content",
+            "created_at",
+            "title",
+            "upload_user__username",
+            "upload_user__id",
+        )
+        return JsonResponse(list(result_articles), safe=False)
 
 
-class ArticleUploadView(View):
-    def get(self, request, *args, **kwargs):
-
-        context = {
-            "form": ArticleUploadForm(),
-        }
-
-        return render(request, "error_resolve_app/upload.html", context)
-
+# 記事の投稿
+class ArticleSave(View):
     def post(self, request, *args, **kwargs):
 
-        form = ArticleUploadForm(request.POST, request.FILES)
+        upload_file_name = request.FILES["file"].name  # ファイル名
+        movie = request.FILES["file"]  # ファイルの中身
+        content = request.POST["content"]
+        title = request.POST["title"]
 
-        if not form.is_valid():
-
-            return render(
-                request, "error_resolve_app/home.html", {"form": ArticleUploadForm()}
-            )
-
-        new_movie_name = form.cleaned_data["movie"].name
         new_article = Article()
-        new_article.upload_file_name = new_movie_name
+        new_article.upload_file_name = upload_file_name
+        new_article.content = content
+        new_article.title = title
+        new_article.created_at = timezone.now()
+        new_article.upload_user = request.user
         new_article.save()
 
         try:
             storage = FileSystemStorage()
             storage.location = DATA_DIR + "/" + str(new_article.id)
-            filename = storage.save(new_movie_name, form.cleaned_data["movie"])
+            file_name = storage.save(upload_file_name, movie)
+
             self.make_video_thumb(
-                DATA_DIR + "/" + str(new_article.id) + "/" + filename,
+                DATA_DIR + "/" + str(new_article.id) + "/" + file_name,
                 new_article.thumb_frame,
                 DATA_DIR + "/" + str(new_article.id) + "/thumb.jpg",
             )
 
         except:
-            self.delete_video(new_article.id, filename)
+            self.delete_video(new_article.id, file_name)
             new_article.delete()
             raise
 
         else:
-            new_article.movie_name = filename
+            new_article.movie_name = file_name
             new_article.save()
 
-        return redirect("error_resolve_app:article_show", article_id=new_article.id)
+        my_articles = Article.objects.all().values()
+        return JsonResponse(list(my_articles), safe=False)
 
     def make_video_thumb(self, src_filename, capture_frame, dst_filename=None):
 
@@ -69,6 +92,7 @@ class ArticleUploadView(View):
         avg_frame_rate = (lambda x: int(x[0]) / int(x[1]))(
             video_info["avg_frame_rate"].split("/")
         )
+        print(avg_frame_rate)
         start_position = int(capture_frame) / avg_frame_rate
 
         if dst_filename == None:
@@ -77,13 +101,14 @@ class ArticleUploadView(View):
             out_target = dst_filename
 
         im = (
-            ffmpeg.input(src_filename, ss=start_position)
+            ffmpeg.input(src_filename, ss=start_position, t=1)
             .filter("scale", 200, -1)
             .output(
                 out_target,
                 vframes=1,
                 format="image2",
                 vcodec="mjpeg",
+                qscale=1,
                 loglevel="warning",
             )
             .overwrite_output()
@@ -102,11 +127,28 @@ class ArticleUploadView(View):
         storage.delete(str(content_id) + "/")
 
 
-class ArticleShow(View):
+# 記事詳細画面を表示させるためのクラス
+class ArticleShowView(View):
     def get(self, request, article_id, *args, **kwargs):
 
-        article = Article.objects.get(pk=article_id)
+        request.session["article_id"] = article_id
 
-        return render(
-            request, "error_resolve_app/article_show.html", {"article": article}
-        )
+        return render(request, "error_resolve_app/article_show.html")
+
+
+# 記事詳細のデータをとってくる
+class GetDetailArticle(View):
+    def get(self, request, *args, **kwargs):
+
+        article_id = request.session["article_id"]
+        article = Article.objects.values(
+            "id",
+            "movie_name",
+            "content",
+            "created_at",
+            "title",
+            "upload_user__username",
+            "upload_user__id",
+        ).get(pk=article_id)
+
+        return JsonResponse(article, safe=False)
