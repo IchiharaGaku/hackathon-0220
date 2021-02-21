@@ -1,0 +1,26 @@
+.create-accounts{
+    background: #f4f1f4;
+    display: flex;
+    flex-flow: column;
+    min-height: 100vh;
+    -ms-flex-align: center;
+    align-items: center;
+    height: 100%;
+}
+
+p,ul{
+    background: #4CA4D0;
+    display: flex;
+    flex-flow: column;
+    font-family: 'Noto Sans';
+    -ms-flex-align: center;
+    align-items: center;
+    border-radius: 20px;
+    padding: 20px;
+    color: #f4f1f4;
+}
+
+.button_wrapper{
+    text-align:center;
+    border-radius: 20px;
+ }

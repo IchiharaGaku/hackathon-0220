@@ -7,7 +7,7 @@ import ffmpeg
 import json
 from django.utils import timezone
 from django.http import JsonResponse
-
+from django.contrib.auth.models import User
 
 # Create your views here.
 DATA_DIR = settings.MEDIA_ROOT
@@ -15,6 +15,7 @@ DATA_DIR = settings.MEDIA_ROOT
 # 自分が書いた記事をとってくる
 class GetMyArticle(View):
     def get(self, request, *args, **kwargs):
+        data = {}
         my_articles = Article.objects.filter(upload_user__id=request.user.id).values(
             "id",
             "movie_name",
@@ -24,24 +25,13 @@ class GetMyArticle(View):
             "upload_user__username",
             "upload_user__id",
         )
-        return JsonResponse(list(my_articles), safe=False)
+        data["user"] = {"username": request.user.username}
+        data["my_articles"] = list(my_articles)
+       
+        
+        return JsonResponse(data, safe=False)
 
 
-# keywordがtitleに含まれている記事をとってくる
-class GetResultArticles(View):
-    def get(self, request, *args, **kwargs):
-
-        keyword = request.GET["keyword"]
-        result_articles = Article.objects.filter(title__icontains=keyword).values(
-            "id",
-            "movie_name",
-            "content",
-            "created_at",
-            "title",
-            "upload_user__username",
-            "upload_user__id",
-        )
-        return JsonResponse(list(result_articles), safe=False)
 
 
 # 記事の投稿
@@ -137,11 +127,37 @@ class ArticleShowView(View):
 
 
 # 記事詳細のデータをとってくる
+
+class SearchResultArticles(View):
+    def get(self, request, *arags, **kwargs):
+
+        request.session["keyword"] = request.GET["keyword"]
+        return render(request, "error_resolve_app/article_result.html")
+
+# keywordがtitleに含まれている記事をとってくる
+class GetResultArticles(View):
+    def get(self, request, *args, **kwargs):
+
+        keyword = request.session["keyword"]
+        result_articles = Article.objects.filter(title__icontains=keyword).values(
+            "id",
+            "movie_name",
+            "content",
+            "created_at",
+            "title",
+            "upload_user__username",
+            "upload_user__id",
+        )
+        print(result_articles)
+        return JsonResponse(list(result_articles), safe=False)
+
+       
 class GetDetailArticle(View):
     def get(self, request, *args, **kwargs):
 
         article_id = request.session["article_id"]
-        article = Article.objects.values(
+        article = Article.objects.get(pk=article_id)
+        article_info = Article.objects.values(
             "id",
             "movie_name",
             "content",
@@ -150,5 +166,7 @@ class GetDetailArticle(View):
             "upload_user__username",
             "upload_user__id",
         ).get(pk=article_id)
+        article_info["content_html"] = article.get_content_html()
+        
 
-        return JsonResponse(article, safe=False)
+        return JsonResponse(article_info, safe=False)

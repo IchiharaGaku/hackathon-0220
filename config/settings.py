@@ -126,6 +126,6 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-LOGIN_URL = 'accounts:login' # ログインしていないときのリダイレクト先
+LOGIN_URL = 'accounts:create' # ログインしていないときのリダイレクト先
 LOGIN_REDIRECT_URL = 'error_resolve_app:home' # ログイン後のリダイレクト先
 LOGOUT_REDIRECT_URL = 'accounts:login' # ログアウト後のリダイレクト先
