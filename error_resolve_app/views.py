@@ -4,7 +4,7 @@ from .forms import ArticleUploadForm
 from .models import Article
 from django.core.files.storage import default_storage, FileSystemStorage
 from django.conf import settings
-#import ffmpeg
+import ffmpeg
 
 # Create your views here.
 DATA_DIR = settings.MEDIA_ROOT
